@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 type TimeRow = {
@@ -8,6 +10,8 @@ type TimeRow = {
 };
 
 export default async function TimesPage() {
+  notFound();
+
   let times: TimeRow[] = [];
   let errorMessage: string | null = null;
 

@@ -21,9 +21,14 @@ type LeagueRow = {
 };
 
 type SeasonRow = {
+  id: number | string; // CHANGED: precisa do id da temporada
   tourney_id: number | string;
   season: number;
-  team_ids: (number | string)[] | null;
+};
+
+type JoinRow = {
+  temporada_id: number | string;
+  time_id: number | string;
 };
 
 export default async function NovoJogoPage() {
@@ -41,7 +46,7 @@ export default async function NovoJogoPage() {
       supabase.from("LigaCampeonato").select("id, code, name"),
       supabase
         .from("LigaCampeonatoTemporada")
-        .select("tourney_id, season, team_ids")
+        .select("id, tourney_id, season") // CHANGED: remove team_ids e pega id
         .order("season", { ascending: false }),
     ]);
 
@@ -50,16 +55,42 @@ export default async function NovoJogoPage() {
   const leaguesList: LeagueRow[] = leagues ?? [];
   const seasonsList: SeasonRow[] = seasons ?? [];
 
+  // ultima season por liga + qual é a temporada_id dessa season
   const latestSeasonByLeague: Record<string, number> = {};
-  const leagueTeamIds: Record<string, (number | string)[]> = {};
+  const latestTemporadaIdByLeague: Record<string, string> = {};
 
   for (const row of seasonsList) {
     const leagueId = String(row.tourney_id);
     const currentSeason = latestSeasonByLeague[leagueId];
     if (currentSeason === undefined || row.season > currentSeason) {
       latestSeasonByLeague[leagueId] = row.season;
-      leagueTeamIds[leagueId] = row.team_ids ?? [];
+      latestTemporadaIdByLeague[leagueId] = String(row.id);
     }
+  }
+
+  // buscar joins (LigaTemporadaTime) das temporadas mais recentes
+  const temporadaIds = Array.from(new Set(Object.values(latestTemporadaIdByLeague)));
+  let joinRows: JoinRow[] = [];
+
+  if (temporadaIds.length > 0) {
+    const { data: joinData, error: joinErr } = await supabase
+      .from("LigaTemporadaTime")
+      .select("temporada_id, time_id")
+      .in("temporada_id", temporadaIds);
+
+    if (joinErr && !errorMessage) {
+      console.error("Erro ao buscar LigaTemporadaTime:", joinErr.message);
+    }
+
+    joinRows = joinData ?? [];
+  }
+
+  // montar leagueId -> teamIds usando o mapeamento leagueId -> temporadaId
+  const leagueTeamIds: Record<string, (number | string)[]> = {};
+  for (const [leagueId, temporadaId] of Object.entries(latestTemporadaIdByLeague)) {
+    leagueTeamIds[leagueId] = joinRows
+      .filter((r) => String(r.temporada_id) === String(temporadaId))
+      .map((r) => r.time_id);
   }
 
   const allTeamIds = Array.from(

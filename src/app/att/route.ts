@@ -219,23 +219,58 @@ export async function POST(req: Request) {
 
       const timeIds = (dbTeams ?? []).map((t) => t.id);
 
-      // 2d) upsert temporada
-      const { error: seasonErr } = await supabase
+      // 2d) upsert temporada (CHANGED: sem team_ids)
+      const { data: seasonRow, error: seasonErr } = await supabase
         .from("LigaCampeonatoTemporada")
         .upsert(
           {
             tourney_id: c.id,
             season: SEASON,
-            team_ids: timeIds,
             places: null,
           },
           { onConflict: "tourney_id,season" },
-        );
+        )
+        .select("id")
+        .single();
 
       if (seasonErr) {
         const payload = { tourney_id: c.id, code, error: seasonErr.message };
         await logErrorToFile(payload);
         throw new Error(`LigaCampeonatoTemporada upsert failed: ${seasonErr.message}`);
+      }
+
+      const temporadaId = seasonRow?.id;
+      if (!temporadaId) {
+        const payload = { tourney_id: c.id, code, error: "temporada_id_missing" };
+        await logErrorToFile(payload);
+        throw new Error("LigaCampeonatoTemporada id missing after upsert");
+      }
+
+      // 2d.1) salvar times da temporada (CHANGED: tabela de junção)
+      // remove os times antigos dessa temporada e recria a lista atual
+      const { error: delJoinErr } = await supabase
+        .from("LigaTemporadaTime")
+        .delete()
+        .eq("temporada_id", temporadaId);
+
+      if (delJoinErr) {
+        const payload = { tourney_id: c.id, code, temporada_id: temporadaId, error: delJoinErr.message };
+        await logErrorToFile(payload);
+        throw new Error(`LigaTemporadaTime delete failed: ${delJoinErr.message}`);
+      }
+
+      if (timeIds.length > 0) {
+        const joinRows = timeIds.map((timeId) => ({
+          temporada_id: temporadaId,
+          time_id: timeId,
+        }));
+
+        const { error: insJoinErr } = await supabase.from("LigaTemporadaTime").insert(joinRows);
+        if (insJoinErr) {
+          const payload = { tourney_id: c.id, code, temporada_id: temporadaId, error: insJoinErr.message };
+          await logErrorToFile(payload);
+          throw new Error(`LigaTemporadaTime insert failed: ${insJoinErr.message}`);
+        }
       }
 
       // 2e) detalhe por time + jogadores
@@ -294,14 +329,16 @@ export async function POST(req: Request) {
             }
 
             const playerRows = squad.map((p) => ({
-              name: p.name ?? null,
+              // CHANGED: name não pode ser null
+              name: p.name ?? "Unknown",
               team: teamId,
               position: null,
               char1: p.position ?? null,
               birthday: p.dateOfBirth ? p.dateOfBirth.split("T")[0] : null,
               foot: null,
               char2: null,
-              star: null,
+              // CHANGED: star não pode ser null
+              star: false,
               power: null,
             }));
 

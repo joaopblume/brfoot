@@ -14,11 +14,12 @@ type TimeRow = {
 
 type PlayerRow = {
   id: number;
-  name: string | null;
+  name: string; 
   char1: string | null;
   birthday: string | null;
   team: number | null;
 };
+
 
 export default async function ConfirmPage(props: { params: Promise<{ id: string }> }) {
   const params = await props.params;

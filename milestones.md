@@ -5,3 +5,4 @@
 3. Habilitar a criação de contas real
 4. Permitir que jogadores sugiram alteração nos times, eliminando a necessidade de buscarmos os dados de todos os times / jogadores por API
 5. Habilitar o gateway de pagamento
+6. ver como deixar endpoints acessiveis somente apos autent

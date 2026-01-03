@@ -40,7 +40,7 @@ export function AuthForm() {
           password,
         });
         if (loginErr) throw loginErr;
-        router.push("/novo-jogo");
+        router.refresh();
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Erro ao autenticar.";

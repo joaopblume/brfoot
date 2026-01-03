@@ -1,5 +1,8 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import NovoJogoForm from "./NovoJogoForm";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 type TimeRow = {
   id: number | string;
@@ -25,6 +28,13 @@ type SeasonRow = {
 
 export default async function NovoJogoPage() {
   const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect("/");
+  }
 
   const [{ data: leagues, error: leagueErr }, { data: seasons, error: seasonErr }] =
     await Promise.all([

@@ -1,6 +1,20 @@
 import { AuthForm } from "@/components/AuthForm";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { ProfilePanel } from "@/components/ProfilePanel";
 
-export default function Home() {
+export default async function Home() {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const username =
+    user?.user_metadata?.username ||
+    user?.user_metadata?.full_name ||
+    user?.email ||
+    "Usuario";
+  const avatarUrl = user?.user_metadata?.avatar_url || null;
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0b1315] text-zinc-100">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(80,200,140,0.25),_transparent_55%)]" />
@@ -21,9 +35,22 @@ export default function Home() {
             </div>
           </div>
           <nav className="flex flex-wrap gap-4 text-sm text-emerald-100">
-            <a className="rounded-full px-3 py-1 transition hover:bg-white/10" href="/novo-jogo">
-              Novo jogo
-            </a>
+            {user && (
+              <a
+                className="rounded-full px-3 py-1 transition hover:bg-white/10"
+                href="/novo-jogo"
+              >
+                Novo jogo
+              </a>
+            )}
+            {user && (
+              <a
+                className="rounded-full px-3 py-1 transition hover:bg-white/10"
+                href="/meu-perfil"
+              >
+                Meu Perfil
+              </a>
+            )}
             <a className="rounded-full px-3 py-1 transition hover:bg-white/10" href="/att">
               Atualizacoes
             </a>
@@ -75,7 +102,16 @@ export default function Home() {
           </div>
 
           <div className="space-y-6">
-            <AuthForm />
+            {!user && <AuthForm />}
+            {user && (
+              <ProfilePanel
+                userId={user.id}
+                initialUsername={username}
+                email={user.email}
+                initialAvatarUrl={avatarUrl}
+                showNovoJogo
+              />
+            )}
 
             <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-sm text-emerald-50">
               <p className="text-sm font-semibold text-white">Painel do treinador</p>

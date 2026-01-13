@@ -10,7 +10,6 @@ type TimeRow = {
 };
 
 export default async function TimesPage() {
-  notFound();
 
   let times: TimeRow[] = [];
   let errorMessage: string | null = null;
@@ -65,16 +64,12 @@ export default async function TimesPage() {
             ) : (
               <ul className="divide-y divide-zinc-100">
                 {times.map((time) => (
-                  <li
-                    key={time.id}
-                    className="grid grid-cols-[80px_1fr_1fr] gap-4 px-4 py-3 text-sm"
-                  >
-                    <span className="font-medium text-zinc-900">
-                      {(time as { name?: string }).name ?? "—"}
-                    </span>
+                  <li key={time.id} className="grid grid-cols-[80px_1fr_1fr] gap-4 px-4 py-3 text-sm">
+                    <span className="font-medium text-zinc-900">{String(time.id)}</span>
+                    <span className="text-zinc-800">{time.name ?? "—"}</span>
                     <span className="text-xs text-zinc-500">
                       {Object.keys(time)
-                        .filter((key) => key !== "id" && key !== "nome")
+                        .filter((key) => key !== "id" && key !== "name")
                         .map((key) => `${key}: ${String(time[key])}`)
                         .join(" • ") || "—"}
                     </span>

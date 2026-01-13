@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { buildLineup433, SlotId } from "@/lib/lineup";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
+import ConfirmStartButton from "./ConfirmStartButton";
 
 type TimeRow = {
   id: number;

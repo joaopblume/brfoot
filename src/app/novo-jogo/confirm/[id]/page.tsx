@@ -114,27 +114,29 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
           </div>
         </header>
 
-        <section className="grid gap-6 lg:grid-cols-[2fr_1fr]">
-          <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-b from-emerald-900/70 to-emerald-950">
-            <FieldLines />
-            {lineup.map((a) => (
-              <PlayerMarker
-                key={a.slot}
-                slot={a.slot}
-                name={a.player.name ?? a.player.char1 ?? "Jogador"}
-                x={a.x}
-                y={a.y}
-              />
-            ))}
-            {lineup.length === 0 && (
-              <div className="absolute inset-0 flex items-center justify-center text-sm text-emerald-100">
-                Nenhum jogador para escalar.
-              </div>
-            )}
+        <section className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-950/40 p-6 flex items-center justify-center">
+            <div className="relative mx-auto aspect-square w-[85%] sm:w-[70%] lg:w-[60%] overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-b from-emerald-900/70 to-emerald-950">
+              <FieldLines />
+              {lineup.map((a) => (
+                <PlayerMarker
+                  key={a.slot}
+                  slot={a.slot}
+                  name={a.player.name ?? a.player.char1 ?? "Jogador"}
+                  x={a.x}
+                  y={a.y}
+                />
+              ))}
+              {lineup.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-emerald-100">
+                  Nenhum jogador para escalar.
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="rounded-xl border border-emerald-100 bg-white p-3 shadow-inner text-emerald-950">
-            <h2 className="text-sm font-semibold text-emerald-900">Elenco (cores por faixa)</h2>
+            <h2 className="text-sm font-semibold text-emerald-900">MEU-TIME</h2>
             <div className="mt-2 space-y-2 max-h-[460px] overflow-auto">
               {/* NEW: usa sortedPlayers */}
               {sortedPlayers.map((p) => {

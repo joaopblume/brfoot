@@ -177,12 +177,7 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
         </section>
 
         <div className="flex justify-end">
-          <Link
-            href={`/novo-jogo/confirm/${team.id}/meu-time`}
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/80 bg-emerald-500 px-5 py-2 text-sm font-medium text-emerald-950 transition hover:border-emerald-300 hover:bg-emerald-400 focus:outline-none focus:ring focus:ring-emerald-300"
-          >
-            Ir para MEU-TIME
-          </Link>
+          <ConfirmStartButton teamId={team.id} teamName={team.name} />
         </div>
       </main>
     </div>

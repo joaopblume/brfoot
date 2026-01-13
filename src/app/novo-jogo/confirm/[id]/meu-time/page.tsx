@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 
+import { buildLineup433, SlotId } from "@/lib/lineup";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
+import MeuTimeOverview from "./MeuTimeOverview";
 
 type TimeRow = {
   id: number;
@@ -14,6 +16,7 @@ type TimeRow = {
 type PlayerRow = {
   id: number;
   name: string;
+  char1: string | null;
   team: number | null;
 };
 
@@ -34,7 +37,7 @@ export default async function MeuTimePage(props: { params: Promise<{ id: string 
 
   const { data: players, error: playersErr } = await supabase
     .from("Jogador")
-    .select("id, name, team")
+    .select("id, name, char1, team")
     .eq("team", teamId)
     .order("name", { ascending: true });
 
@@ -43,35 +46,80 @@ export default async function MeuTimePage(props: { params: Promise<{ id: string 
   const crest = team.crest_url ?? team.badge;
   const flag = team.flag_url ?? team.flag;
 
+  const positionRank = (pos?: string | null) => {
+    if (!pos) return 99;
+    const p = pos.toLowerCase();
+    if (p.includes("keeper")) return 1;
+    if (p.includes("back") || p.includes("def")) return 2;
+    if (p.includes("mid")) return 3;
+    if (p.includes("wing") || p.includes("forward") || p.includes("attack")) return 4;
+    return 98;
+  };
+
+  const sortedPlayers = [...(players ?? [])].sort((a, b) => {
+    const ra = positionRank(a.char1);
+    const rb = positionRank(b.char1);
+    if (ra !== rb) return ra - rb;
+
+    const na = (a.name ?? "").toLowerCase();
+    const nb = (b.name ?? "").toLowerCase();
+    if (na !== nb) return na.localeCompare(nb);
+
+    return a.id - b.id;
+  });
+
+  const lineup = buildLineup433(
+    sortedPlayers.map((p) => ({
+      id: p.id,
+      name: p.name ?? undefined,
+      char1: p.char1 ?? undefined,
+    })),
+  );
+
   return (
     <div className="min-h-screen bg-emerald-950 text-emerald-50">
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12">
         <header className="flex items-center gap-4">
-          {crest && (
-            <img
-              src={crest}
-              alt="Escudo"
-              className="h-16 w-16 rounded bg-white object-contain p-2 shadow"
-            />
-          )}
-          <div className="flex flex-col">
-            <h1 className="text-3xl font-semibold">{team.name ?? `Time ${team.id}`}</h1>
-            {flag && (
-              <span className="mt-1 flex items-center gap-2 text-sm text-emerald-100">
-                <img src={flag} alt="Bandeira" className="h-5 w-7 rounded object-cover" />
-                Bandeira
-              </span>
+          <div className="flex items-center gap-4">
+            {crest && (
+              <img
+                src={crest}
+                alt="Escudo"
+                className="h-16 w-16 rounded bg-white object-contain p-2 shadow"
+              />
             )}
+            <div className="flex flex-col">
+              <h1 className="text-3xl font-semibold">{team.name ?? `Time ${team.id}`}</h1>
+              {flag && (
+                <span className="mt-1 flex items-center gap-2 text-sm text-emerald-100">
+                  <img src={flag} alt="Bandeira" className="h-5 w-7 rounded object-cover" />
+                  Bandeira
+                </span>
+              )}
+            </div>
           </div>
         </header>
+
+        <MeuTimeOverview teamId={team.id} />
 
         <section className="grid gap-6 lg:grid-cols-[3fr_2fr]">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-950/40 p-6 flex items-center justify-center">
             <div className="relative mx-auto aspect-square w-[85%] sm:w-[70%] lg:w-[60%] overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-b from-emerald-900/70 to-emerald-950">
               <FieldLines />
-              <div className="absolute inset-0 flex items-center justify-center text-sm text-emerald-100">
-                Area de escalação
-              </div>
+              {lineup.map((a) => (
+                <PlayerMarker
+                  key={a.slot}
+                  slot={a.slot}
+                  name={a.player.name ?? a.player.char1 ?? "Jogador"}
+                  x={a.x}
+                  y={a.y}
+                />
+              ))}
+              {lineup.length === 0 && (
+                <div className="absolute inset-0 flex items-center justify-center text-sm text-emerald-100">
+                  Nenhum jogador para escalar.
+                </div>
+              )}
             </div>
           </div>
 
@@ -95,6 +143,32 @@ export default async function MeuTimePage(props: { params: Promise<{ id: string 
           </div>
         </section>
       </main>
+    </div>
+  );
+}
+
+function PlayerMarker({
+  slot,
+  name,
+  x,
+  y,
+}: {
+  slot: SlotId;
+  name: string;
+  x: number;
+  y: number;
+}) {
+  return (
+    <div
+      className="absolute flex flex-col items-center"
+      style={{ left: `${x}%`, top: `${y}%`, transform: "translate(-50%, -50%)" }}
+    >
+      <div className="h-10 w-10 rounded-full bg-white/90 text-xs font-semibold text-emerald-800 shadow flex items-center justify-center">
+        {slot}
+      </div>
+      <div className="mt-1 max-w-[140px] truncate rounded bg-black/50 px-2 py-0.5 text-[11px] text-white">
+        {name}
+      </div>
     </div>
   );
 }

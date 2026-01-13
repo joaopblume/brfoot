@@ -34,6 +34,7 @@ export default function NovoJogoForm({
   const [selectedLeague, setSelectedLeague] = useState<string>(
     leagues[0] ? String(leagues[0].id) : "",
   );
+  const [coachName, setCoachName] = useState<string>("");
   const [selectedTeam, setSelectedTeam] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -62,6 +63,22 @@ export default function NovoJogoForm({
       setErrorMsg("Selecione um time.");
       return;
     }
+    const league = leagues.find((l) => String(l.id) === selectedLeague);
+    try {
+      localStorage.setItem(
+        `novo-jogo-meta-${team.id}`,
+        JSON.stringify({
+          coachName: coachName.trim() || null,
+          leagueName: league?.name ?? league?.code ?? null,
+          season: latestSeasonByLeague[String(league?.id ?? "")] ?? null,
+          stadiumName: null,
+          fans: 500000,
+          cash: 54000000,
+        }),
+      );
+    } catch (error) {
+      console.error("Falha ao salvar meta:", error);
+    }
     setSubmitting(true);
     router.push(`/novo-jogo/confirm/${team.id}`);
   }
@@ -77,6 +94,8 @@ export default function NovoJogoForm({
           required
           placeholder="Ex.: Joao Silva"
           className="mt-2 w-full rounded-lg border border-emerald-100 bg-white px-3 py-2 text-emerald-950 outline-none ring-emerald-200 transition focus:border-emerald-400 focus:ring"
+          value={coachName}
+          onChange={(e) => setCoachName(e.target.value)}
         />
       </div>
 

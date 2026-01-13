@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { buildLineup433, SlotId } from "@/lib/lineup";
 import { createServiceSupabaseClient } from "@/lib/supabase/service";
+import ConfirmStartButton from "./ConfirmStartButton";
 
 type TimeRow = {
   id: number;
@@ -176,12 +177,7 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
         </section>
 
         <div className="flex justify-end">
-          <Link
-            href={`/novo-jogo/confirm/${team.id}/meu-time`}
-            className="inline-flex items-center justify-center rounded-lg bg-emerald-500 px-5 py-2 text-sm font-semibold text-emerald-950 shadow-md shadow-emerald-900/40 transition hover:bg-emerald-400 focus:outline-none focus:ring focus:ring-emerald-300"
-          >
-            Ir para MEU-TIME
-          </Link>
+          <ConfirmStartButton teamId={team.id} teamName={team.name} />
         </div>
       </main>
     </div>

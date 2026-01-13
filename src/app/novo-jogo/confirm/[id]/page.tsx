@@ -174,6 +174,15 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
             </div>
           </div>
         </section>
+
+        <div className="flex justify-end">
+          <Link
+            href={`/novo-jogo/confirm/${team.id}/meu-time`}
+            className="inline-flex items-center justify-center rounded-lg bg-emerald-500 px-5 py-2 text-sm font-semibold text-emerald-950 shadow-md shadow-emerald-900/40 transition hover:bg-emerald-400 focus:outline-none focus:ring focus:ring-emerald-300"
+          >
+            Ir para MEU-TIME
+          </Link>
+        </div>
       </main>
     </div>
   );

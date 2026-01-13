@@ -18,7 +18,7 @@ export default async function TimesPage() {
     const supabase = await createServerSupabaseClient();
     const { data, error } = await supabase.from("Time").select("*");
 
-    if (error) {
+    if (error?.message) {
       errorMessage = error.message;
     } else {
       times = data ?? [];

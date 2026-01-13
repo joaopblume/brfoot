@@ -99,7 +99,7 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
         <div>
           <Link
             href="/novo-jogo"
-            className="inline-flex items-center gap-2 rounded-full border border-emerald-100/60 bg-emerald-900/60 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-900"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-100/60 bg-emerald-900/60 px-5 py-2 text-sm font-medium text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-900 focus:outline-none focus:ring focus:ring-emerald-300"
           >
             ← Voltar para seleção de time
           </Link>
@@ -178,7 +178,7 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
         <div className="flex justify-end">
           <Link
             href={`/novo-jogo/confirm/${team.id}/meu-time`}
-            className="inline-flex items-center justify-center rounded-lg bg-emerald-500 px-5 py-2 text-sm font-semibold text-emerald-950 shadow-md shadow-emerald-900/40 transition hover:bg-emerald-400 focus:outline-none focus:ring focus:ring-emerald-300"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/80 bg-emerald-500 px-5 py-2 text-sm font-medium text-emerald-950 transition hover:border-emerald-300 hover:bg-emerald-400 focus:outline-none focus:ring focus:ring-emerald-300"
           >
             Ir para MEU-TIME
           </Link>

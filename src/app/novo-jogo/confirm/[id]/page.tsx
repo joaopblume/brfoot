@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { buildLineup433, SlotId } from "@/lib/lineup";
@@ -95,6 +96,14 @@ export default async function ConfirmPage(props: { params: Promise<{ id: string 
   return (
     <div className="min-h-screen bg-emerald-950 text-emerald-50">
       <main className="mx-auto flex max-w-6xl flex-col gap-8 px-6 py-12">
+        <div>
+          <Link
+            href="/novo-jogo"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-100/60 bg-emerald-900/60 px-4 py-2 text-sm font-medium text-emerald-50 transition hover:border-emerald-100 hover:bg-emerald-900"
+          >
+            ← Voltar para seleção de time
+          </Link>
+        </div>
         <header className="flex items-center gap-4">
           {crest && (
             <img
